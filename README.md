@@ -2,6 +2,3 @@
 Bibliothèque de threads
 
 
-Pour compiler:
-    - “cmake .” à la racine
-    - executer l’éxecutable dans build/
