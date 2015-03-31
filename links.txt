@@ -1,0 +1,15 @@
+https://code.google.com/p/projet-systeme-dexploitation-2a-enseirb/source/browse/#svn%2Ftrunk
+
+https://code.google.com/p/enseirb-projet-systeme-lmmos/source/browse/#svn%2Ftrunk%253Fstate%253Dclosed
+
+https://github.com/vlandeiro/thread-enseirb
+
+https://github.com/ahonorat/se_emk
+
+https://github.com/uOptim/thread-enseirb
+
+http://sourceforge.net/p/it202/code/HEAD/tree/
+
+https://code.google.com/p/projet-systeme-mb-ym-sr-se-gs-mj/source/browse/#svn%2Ftrunk
+
+https://bitbucket.org/Zopieux/enseirb-systeme
