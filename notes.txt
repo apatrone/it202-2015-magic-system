@@ -1,0 +1,20 @@
+struct ucontext_t {
+	uc_link   //passer une reference vers le contexte qui sera retabli 
+	ss_sp.stack   	//pile du contexte, que l'on doit allouer
+	ss_sp.stack_size
+	mcontext_t //contexte materiel (setté par le noyau, defini au moment de getcontext)
+	
+}	
+
+la fonction swapcontext(&previous, &uc) sauvegarde le contexte courant dans previous, et passe dans uc
+setcontext(&uc) prend juste le contexte vers lequel on va jump	
+makecontext(&uc, func, nbarg, args) --> appele la fonction func au changement de contexte en lui passant args
+
+quand un contexte termine, il faut mettre le contexte pointé par uclink, null permet de dire que c'est lwe dernier contexte (donc on termine)	
+
+"extern"
+1. Declaration can be done any number of times but definition only once.
+2. “extern” keyword is used to extend the visibility of variables/functions().
+3. Since functions are visible through out the program by default. The use of extern is not needed in function declaration/definition. Its use is redundant.
+4. When extern is used with a variable, it’s only declared not defined.
+5. As an exception, when an extern variable is declared with initialization, it is taken as definition of the variable as well.
