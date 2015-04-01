@@ -3,12 +3,25 @@
 
 #ifndef USE_PTHREAD
 
+#include <ucontext.h>
 /* identifiant de thread
  * NB: pourra être un entier au lieu d'un pointeur si ca vous arrange,
  *     mais attention aux inconvénient des tableaux de threads
  *     (consommation mémoire, cout d'allocation, ...).
  */
-typedef void * thread_t;
+typedef void * thread_t;  //the void* means it can point to any data type. you have to cast it when using it
+
+/* Structure du thread
+*/
+struct thread{
+	
+	int id;
+	ucontext_t context;
+	void *(*func_ptr)(void *);
+	void *funcarg ;
+	void **retval;
+
+};
 
 /* recuperer l'identifiant du thread courant.
  */
