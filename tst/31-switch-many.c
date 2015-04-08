@@ -51,7 +51,7 @@ int main(int argc, char *argv[])
     assert(!err);
   }
 
-  for(i=0; i<nbyield; i++)
+  for(i=0; i<(int)nbyield; i++)
     thread_yield();
 
   for(i=0; i<nbth; i++) {
