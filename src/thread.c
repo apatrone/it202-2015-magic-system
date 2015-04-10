@@ -1,6 +1,35 @@
 #include "thread.h"
 #include<sys/queue.h>
 #include<ucontext.h>
+#include<queue.h>;
+
+
+
+STAILQ_HEAD(Thread_Queue, thread_t);
+
+struct Thread_Queue* thread_queue;
+thread_t* thread_current;
+thread_t* thread_to_free;
+
+
+
+// Initialise la thread_queue
+extern init_thread_queue()
+{
+  STAILQ_INIT(&thread_queue);
+}
+
+
+//Créer un thread
+extern thread_t *newthread()
+{
+  thread_t  *thread = malloc(sizeof(int));
+  thread->id = &thread;
+  STAILQ_INSERT_TAIL(thread_queue, thread, field); 
+  return thread;
+}
+
+
 extern thread_t thread_self(){
   
 }
