@@ -13,13 +13,10 @@ typedef void * thread_t;  //the void* means it can point to any data type. you h
 
 /* Structure du thread
 */
-struct thread{
+struct thread_t{
 	
-	int id;
 	ucontext_t context;
-	void *(*func_ptr)(void *);
-	void *funcarg ;
-	void **retval;
+	void *retval;
 
 };
 
