@@ -37,6 +37,7 @@ extern int thread_create(thread_t *newthread, void *(*func)(void *), void *funca
   (t->status) = READY;
 
   *newthread = t;
+
   //ucontext_t current_context;
   //swapcontext(&current_context, &(t->context));
   //return thread_yield();
@@ -44,6 +45,7 @@ extern int thread_create(thread_t *newthread, void *(*func)(void *), void *funca
 
   return 0;
 }
+
 
 extern void thread_yield(void){
   thread_current->status = WAITING;
