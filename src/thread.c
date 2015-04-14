@@ -31,7 +31,7 @@ extern thread_t *newthread()
 
 
 extern thread_t thread_self(){
-  
+  return thread_current;
 }
 
 extern int thread_create(thread_t *newthread, void *(*func)(void *), void *funcarg){
