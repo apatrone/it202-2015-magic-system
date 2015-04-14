@@ -44,16 +44,12 @@ extern int thread_create(thread_t *newthread, void *(*func)(void *), void *funca
   (newthread->context)->uc_stack.ss_flags=O;
   (newthread->context)->uc_link=NULL;
   makecontext(&(t->context),func,1, funcarg);
-<<<<<<< HEAD
-  ((*newthread)->status)=READY;
-  
-=======
+
   (newthread->status)=READY;
   //ucontext_t current_context;
   //swapcontext(&current_context, &(t->context));
   //return thread_yield();
 
->>>>>>> bcd6d4b52b966e86138f3aa9c07ea1f60dcca3aa
   return 0;
 }
 
