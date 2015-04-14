@@ -1,7 +1,7 @@
 #include "thread.h"
-#include<sys/queue.h>
-#include<ucontext.h>
-#include<queue.h>;
+#include <sys/queue.h>
+#include <ucontext.h>
+#include <queue.h>;
 
 
 
@@ -10,8 +10,7 @@ STAILQ_HEAD(Thread_Queue, thread_t);
 struct Thread_Queue* thread_queue;
 thread_t* thread_current;
 thread_t* thread_to_free;
-
-
+thread_t * old_thread;
 
 // Initialise la thread_queue
 extern init_thread_queue()
@@ -42,7 +41,8 @@ extern int thread_create(thread_t *newthread, void *(*func)(void *), void *funca
   ((*newthread)->context)->uc_stack.ss_sp=malloc(t->uc_stack.ss_size);
   ((*newthread)->context)->uc_stack.ss_flags=O;
   ((*newthread)->context)->uc_link=NULL;
-  makecontext(&(t->context), func, 1, funcarg);
+  makecontext(&(t->context),func,1, funcarg);
+  ((*newthread)->status)=READY;
   //ucontext_t current_context;
   //swapcontext(&current_context, &(t->context));
   //return thread_yield();
@@ -51,7 +51,14 @@ extern int thread_create(thread_t *newthread, void *(*func)(void *), void *funca
 }
 
 extern int thread_yield(void){
-
+  thread_current->status= WAITING;
+  old_thread= thread_current;
+  //Tester si la queue est vide si non:
+  //prendre la tete de la queue et la mettre dans thread_current
+  //Supprimer la tete et placer a tete au suivant de la queue
+  thread_current->status = RUNNING;
+  swapcontext(&(old_thread->context), &(thread_current));
+  
 }
 
 extern int thread_join(thread_t thread, void **retval){

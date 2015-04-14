@@ -27,6 +27,7 @@ int main(int argc, char *argv[])
   printf("le main a lancé les threads %p et %p\n",
 	 (void*) thread1, (void*) thread2);
 
+
   printf("le main attend les threads\n");
   err = thread_join(thread2, &retval2);
   assert(!err);
@@ -34,6 +35,7 @@ int main(int argc, char *argv[])
   assert(!err);
   printf("les threads ont terminé en renvoyant '%s' and '%s'\n",
 	 (char *) retval1, (char *) retval2);
+
 
   return 0;
 }

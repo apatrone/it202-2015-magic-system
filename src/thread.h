@@ -9,15 +9,20 @@
  *     mais attention aux inconvénient des tableaux de threads
  *     (consommation mémoire, cout d'allocation, ...).
  */
+
+
+typedef enum {REDAY, RUNNING, FINISHED, WAITING} status; 
+
 typedef void * thread_t;  //the void* means it can point to any data type. you have to cast it when using it
 
 /* Structure du thread
 */
 struct thread_t{
-	
-	ucontext_t context;
-	void *retval;
-
+  int id;
+  ucontext_t context;
+  void *retval;
+  status status;
+  
 };
 
 /* recuperer l'identifiant du thread courant.
