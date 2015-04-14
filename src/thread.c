@@ -1,7 +1,7 @@
 #include "thread.h"
 #include <sys/queue.h>
 #include <ucontext.h>
-#include <queue.h>
+#include "queue.h"
 
 
 
