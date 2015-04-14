@@ -16,13 +16,14 @@ typedef enum {REDAY, RUNNING, FINISHED, WAITING} status;
 typedef void * thread_t;  //the void* means it can point to any data type. you have to cast it when using it
 
 /* Structure du thread
-*/
+ */
 struct thread_t{
-  int id;
-  ucontext_t context;
-  void *retval;
-  status status;
-  
+int id;
+ucontext_t context;
+void *retval;
+status status;
+thread_t * next;
+thread_t * previous;
 };
 
 /* recuperer l'identifiant du thread courant.
@@ -42,7 +43,7 @@ extern int thread_yield(void);
  * la valeur renvoyée par le thread est placée dans *retval.
  * si retval est NULL, la valeur de retour est ignorée.
  */
-extern int thread_join(thread_t thread, void **retval);
+extern int thread_join(thread_t *thread, void **retval);
 
 /* terminer le thread courant en renvoyant la valeur de retour retval.
  * cette fonction ne retourne jamais.

@@ -1,7 +1,7 @@
 #include "thread.h"
 #include <sys/queue.h>
 #include <ucontext.h>
-#include <queue.h>;
+#include <queue.h>
 
 
 
@@ -11,6 +11,7 @@ struct Thread_Queue* thread_queue;
 thread_t* thread_current;
 thread_t* thread_to_free;
 thread_t * old_thread;
+
 
 // Initialise la thread_queue
 extern init_thread_queue()
@@ -61,9 +62,22 @@ extern int thread_yield(void){
   
 }
 
-extern int thread_join(thread_t thread, void **retval){
+extern int thread_join(thread_t *thread, void **retval){
   //  wait();
+  
+  //on déclare qu ele thread dont on attend la fin de l'éxécution est thread 
+  thread_current->previous= thread;
+  //On le met en attente
+  thread_current->status= WAINTING;
+  //On met le thread en running si ce n'est déja fait
+  thread->status=RUNNING;
+  //On déclare que le prochain à exécuter après thread est thread_current 
+  thread->next= thread_current;
 
+  if(retval!=NULL){
+    *retval=thread->retval;
+  } 
+  
   free(((*thread_to_free)->context)->uc_stack.ss_sp);
   free(*thread_to_free);
   return &retval;
@@ -71,5 +85,10 @@ extern int thread_join(thread_t thread, void **retval){
 
 
 extern void thread_exit(void *retval) __attribute__ ((__noreturn__)){
+  thread_to_free=thread_current;
+  thread_to_free->next=NULL;
+  thread_to_free->status= FINISHED;
+  thread_current=thread_current->next;
+  thread_current->previous=NULL;
   setcontext((*thread_queue)->context);
 }
