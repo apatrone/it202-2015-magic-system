@@ -44,9 +44,6 @@ extern int thread_create(thread_t *newthread, void *(*func)(void *), void *funca
   ((*newthread)->context)->uc_link=NULL;
   makecontext(&(t->context),func,1, funcarg);
   ((*newthread)->status)=READY;
-  //ucontext_t current_context;
-  //swapcontext(&current_context, &(t->context));
-  //return thread_yield();
   
   return 0;
 }
@@ -54,9 +51,14 @@ extern int thread_create(thread_t *newthread, void *(*func)(void *), void *funca
 extern int thread_yield(void){
   thread_current->status= WAITING;
   old_thread= thread_current;
-  //Tester si la queue est vide si non:
-  //prendre la tete de la queue et la mettre dans thread_current
-  //Supprimer la tete et placer a tete au suivant de la queue
+
+
+  if(Thread_Queue->first){
+    thread_current=Thread_Queue->first;
+    Thread_Queue->first=thread_current->next;
+  }
+  
+
   thread_current->status = RUNNING;
   swapcontext(&(old_thread->context), &(thread_current));
   
