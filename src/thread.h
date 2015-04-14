@@ -2,7 +2,7 @@
 #define __THREAD_H__
 
 #ifndef USE_PTHREAD
-
+#include "queue.h"
 #include <ucontext.h>
 /* identifiant de thread
  * NB: pourra être un entier au lieu d'un pointeur si ca vous arrange,
@@ -11,20 +11,20 @@
  */
 
 
-typedef enum {REDAY, RUNNING, FINISHED, WAITING} status;
+typedef enum {READY, RUNNING, FINISHED, WAITING} status_e;
 
-typedef void * thread_t;  //the void* means it can point to any data type. you have to cast it when using it
 
 /* Structure du thread
  */
-struct thread_t{
-int id;
-ucontext_t context;
-void *retval;
-status status;
-thread_t * next;
-thread_t * previous;
-};
+typedef struct thread_ {
+  long id;
+  ucontext_t context;
+  void *retval;
+  status_e status;
+  STAILQ_ENTRY(thread_) next;
+} thread_s;
+
+typedef thread_s * thread_t;  //the void* means it can point to any data type. you have to cast it when using it
 
 /* recuperer l'identifiant du thread courant.
  */
@@ -37,13 +37,13 @@ extern int thread_create(thread_t *newthread, void *(*func)(void *), void *funca
 
 /* passer la main à un autre thread.
  */
-extern int thread_yield(void);
+extern void thread_yield(void);
 
 /* attendre la fin d'exécution d'un thread.
  * la valeur renvoyée par le thread est placée dans *retval.
  * si retval est NULL, la valeur de retour est ignorée.
  */
-extern int thread_join(thread_t *thread, void **retval);
+extern int thread_join(thread_t thread, void **retval);
 
 /* terminer le thread courant en renvoyant la valeur de retour retval.
  * cette fonction ne retourne jamais.
