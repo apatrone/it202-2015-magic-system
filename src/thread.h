@@ -11,7 +11,7 @@
  */
 
 
-typedef enum {REDAY, RUNNING, FINISHED, WAITING} status; 
+typedef enum {REDAY, RUNNING, FINISHED, WAITING} status;
 
 typedef void * thread_t;  //the void* means it can point to any data type. you have to cast it when using it
 
