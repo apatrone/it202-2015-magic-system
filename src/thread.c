@@ -3,7 +3,8 @@
 #include <ucontext.h>
 #include "queue.h"
 #include <stdlib.h>
-
+#include <errno.h>
+#include <stdio.h>
 
 STAILQ_HEAD(Thread_Queue, thread_);
 
@@ -84,12 +85,16 @@ extern int thread_join(thread_t thread, void **retval){
 }
 
 
-extern void thread_exit(void *retval) __attribute__ ((__noreturn__)){
+extern void __attribute__ ((__noreturn__)) thread_exit(void *retval){
   current_thread->status= FINISHED;
+  current_thread->retval=retval;
   thread_t tmp_t= current_thread;
-  current_thread=current_thread->next;
+  current_thread=current_thread->next.stqe_next;
   current_thread->status=READY;
   STAILQ_INSERT_TAIL(queue_to_free,tmp_t,next);
   //Supprime t'on la tete de la queue? ou garde t'on tous les threads termines?
-  setcontext((*thread_queue)->context);
-};
+  int rc=setcontext(&(thread_queue->stqh_first)->context); 
+  if(rc==-1)
+    perror("Error: setcontext");
+
+}
