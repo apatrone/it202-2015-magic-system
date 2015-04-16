@@ -84,12 +84,12 @@ extern int thread_join(thread_t thread, void **retval){
 }
 
 
-extern void thread_exit(void *retval) __attribute__ ((__noreturn__)){
+extern void thread_exit(void *retval){
   current_thread->status= FINISHED;
   thread_t tmp_t= current_thread;
-  current_thread=current_thread->next;
+  current_thread=current_thread->next.stqe_next;
   current_thread->status=READY;
   STAILQ_INSERT_TAIL(queue_to_free,tmp_t,next);
   //Supprime t'on la tete de la queue? ou garde t'on tous les threads termines?
-  setcontext((*thread_queue)->context);
-};
+  setcontext(thread_queue->stqh_first->context);//setcontext((*thread_queue)->context);
+}
