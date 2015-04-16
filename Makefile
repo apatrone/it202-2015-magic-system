@@ -25,10 +25,12 @@ testbinary = $(BINDIR)/$(binfile)
 
 
 with-ourlib:
+	@mkdir -p bin
 	@$(foreach tstfile,$(TSTLIST),$(inforeachwithourlib))
 	@echo "Done !"
 
 with-pthread:
+	@mkdir -p bin
 	@$(foreach tstfile,$(TSTLIST),$(inforeachwithpthread))
 	@echo "Done !"
 
