@@ -100,9 +100,9 @@ extern void __attribute__ ((__noreturn__)) thread_exit(void *retval){
 
   int rc=setcontext(&(thread_queue->stqh_first)->context); 
   if(rc==-1)
-    perror("Error: setcontext");
+      perror("Error: setcontext");
 
 
-  setcontext(thread_queue->stqh_first->context);//setcontext((*thread_queue)->context);
+
 
 }
