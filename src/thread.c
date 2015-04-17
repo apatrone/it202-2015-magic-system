@@ -13,7 +13,7 @@ int thread_init = 0;
 
 struct threadqueue* thread_queue;
 struct threadqueue thread__queue;
-struct threadqueue* queue_to_free;
+struct threadqueue* queue_to_free;  //à changer sans *
 thread_t current_thread;
 //thread_t thread_to_free;
 thread_t old_thread;
@@ -34,7 +34,7 @@ extern void init_thread(thread_t *t){
 
 void libthread_init() {	  
   	STAILQ_INIT(&thread__queue);
-  	STAILQ_INIT(queue_to_free);
+  	//STAILQ_INIT(queue_to_free);
 		init_thread(&current_thread);
   	thread_init = 1;
 }
@@ -48,24 +48,26 @@ extern thread_t thread_self(){
 }
 
 extern int thread_create(thread_t *newthread, void *(*func)(void *), void *funcarg){
+
   if(!thread_init){
     libthread_init();
   }
-  	
+
   thread_t t;
  	init_thread(&t);
- 	printf("ici\n");
+
  	makecontext(&(t->context), (void (*)(void))func, 1, funcarg); printf("ici\n");
   (t->status) = READY;
 
   *newthread = t;
   STAILQ_INSERT_TAIL(&thread__queue, t, next); //erreur de seg ici
-	printf("lol\n");
+
   return 0;
 }
 
 
 extern void thread_yield(void){
+
   if(!thread_init){
     libthread_init();
   }
@@ -86,24 +88,23 @@ extern void thread_yield(void){
 
 extern int thread_join(thread_t thread, void **retval){
 	assert(thread_init);
-    	printf("join\n");
   //On le met en attente
-  current_thread->status= WAITING;	printf("join\n");
+  current_thread->status= WAITING;	
   //On met le thread en running si ce n'est déja fait
   thread->status=RUNNING;
   //On déclare que le prochain à exécuter après thread est current_thread
   thread->next.stqe_next = current_thread;
-	printf("join\n");
+
   if(retval!=NULL){
     *retval=thread->retval;
   }
-	printf("join\n");
+
   free((thread->context).uc_stack.ss_sp);
   free(thread);
 
   if(!retval)
-      return 0;
-  return -1;
+      return 1;  //si pas d'erreur
+  return 0;
 }
 
 
