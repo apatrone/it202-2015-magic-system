@@ -11,9 +11,9 @@ STAILQ_HEAD(threadqueue, thread_) ;
 
 int thread_init = 0;
 
-struct threadqueue* thread_queue;
-struct threadqueue thread__queue;
-struct threadqueue* queue_to_free;  //à changer sans *
+struct threadqueue thread_queue;
+//struct threadqueue thread__queue;
+struct threadqueue queue_to_free;  //à changer sans *
 thread_t current_thread;
 //thread_t thread_to_free;
 thread_t old_thread;
@@ -33,9 +33,10 @@ extern void init_thread(thread_t *t){
 }
 
 void libthread_init() {	  
-  	STAILQ_INIT(&thread__queue);
+  	STAILQ_INIT(&thread_queue);
   	//STAILQ_INIT(queue_to_free);
 		init_thread(&current_thread);
+		init_thread(&old_thread);
   	thread_init = 1;
 }
 
@@ -56,11 +57,11 @@ extern int thread_create(thread_t *newthread, void *(*func)(void *), void *funca
   thread_t t;
  	init_thread(&t);
 
- 	makecontext(&(t->context), (void (*)(void))func, 1, funcarg); printf("ici\n");
+ 	makecontext(&(t->context), (void (*)(void))func, 1, funcarg); 
   (t->status) = READY;
 
   *newthread = t;
-  STAILQ_INSERT_TAIL(&thread__queue, t, next); //erreur de seg ici
+  STAILQ_INSERT_TAIL(&thread_queue, t, next); //erreur de seg ici
 
   return 0;
 }
@@ -69,16 +70,15 @@ extern int thread_create(thread_t *newthread, void *(*func)(void *), void *funca
 extern void thread_yield(void){
 
   if(!thread_init){
-    libthread_init();
-  }
-  	
+    libthread_init();    
+  } 	
   current_thread->status = WAITING;
   old_thread = current_thread;
 
-  if(thread_queue->stqh_first)
+  if((&thread_queue)->stqh_first!=NULL)
   {
-      current_thread = thread_queue->stqh_first;
-      thread_queue->stqh_first = thread_queue->stqh_first->next.stqe_next;
+      current_thread = (&thread_queue)->stqh_first;
+      (&thread_queue)->stqh_first = (&thread_queue)->stqh_first->next.stqe_next;
   }
 
   current_thread->status = RUNNING;
@@ -117,10 +117,10 @@ void thread_exit(void *retval){
   thread_t tmp_t= current_thread;
   current_thread=current_thread->next.stqe_next;
   current_thread->status=READY;
-  STAILQ_INSERT_TAIL(queue_to_free,tmp_t,next);
+  STAILQ_INSERT_TAIL(&queue_to_free,tmp_t,next);
   //Supprime t'on la tete de la queue? ou garde t'on tous les threads termines?
 
-  int rc=setcontext(&(thread_queue->stqh_first)->context); 
+  int rc=setcontext(&((&thread_queue)->stqh_first)->context); 
   if(rc==-1)
       perror("Error: setcontext");
 
