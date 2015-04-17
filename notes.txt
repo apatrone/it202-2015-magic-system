@@ -18,3 +18,16 @@ quand un contexte termine, il faut mettre le contexte pointé par uclink, null p
 3. Since functions are visible through out the program by default. The use of extern is not needed in function declaration/definition. Its use is redundant.
 4. When extern is used with a variable, it’s only declared not defined.
 5. As an exception, when an extern variable is declared with initialization, it is taken as definition of the variable as well.
+
+
+
+on peut pas faire plusiers join!
+
+pour le link, on peut le mettre toujours sur le même contexte auquel on reviendra toujours et qui sera chargé du nettoyage.
+ou utiliser la queue \o/
+
+
+quand on fait le makecontext il faut pas passer direct la fonction de l'utilisateur mais un wrapper qui englobe cette fonction
+
+rapport: comparer performances entre pthread et notre librairie (ex: test avec fibonacci). quels sont les avantages et les inconvenients des 2 librairies? 
+pthread a plusieurs threads noyaux (affichage non deterministe) et nous non
