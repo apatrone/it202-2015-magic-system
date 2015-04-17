@@ -12,7 +12,6 @@ STAILQ_HEAD(threadqueue, thread_) ;
 int thread_init = 0;
 
 struct threadqueue thread_queue;
-//struct threadqueue thread__queue;
 struct threadqueue queue_to_free;  //à changer sans *
 thread_t current_thread;
 //thread_t thread_to_free;
@@ -34,7 +33,7 @@ extern void init_thread(thread_t *t){
 
 void libthread_init() {	  
   	STAILQ_INIT(&thread_queue);
-  	//STAILQ_INIT(queue_to_free);
+  	STAILQ_INIT(&queue_to_free);
 		init_thread(&current_thread);
 		init_thread(&old_thread);
   	thread_init = 1;
@@ -114,17 +113,19 @@ void thread_exit(void *retval){
 
   current_thread->status= FINISHED;
   current_thread->retval=retval;
-  thread_t tmp_t= current_thread;
-  current_thread=current_thread->next.stqe_next;
-  current_thread->status=READY;
+  thread_t tmp_t= current_thread;  
+  current_thread=current_thread->next.stqe_next;  
+  if(current_thread){
+  	current_thread->status=READY;printf("boucle\n");
+  }
+
   STAILQ_INSERT_TAIL(&queue_to_free,tmp_t,next);
+  printf("exit\n");
   //Supprime t'on la tete de la queue? ou garde t'on tous les threads termines?
 
-  int rc=setcontext(&((&thread_queue)->stqh_first)->context); 
+  int rc=setcontext(&((&thread_queue)->stqh_first->context)); 
   if(rc==-1)
       perror("Error: setcontext");
-
-
 
 
 }
