@@ -21,8 +21,8 @@ thread_t old_thread;
 
 
 extern void init_thread(thread_t *t){
-	*t = malloc(sizeof(thread_s));
-	getcontext(&((*t)->context));
+  *t = malloc(sizeof(thread_s));
+  getcontext(&((*t)->context));
   ((*t)->context).uc_stack.ss_size=64*1024;
   ((*t)->context).uc_stack.ss_sp = malloc((*t)->context.uc_stack.ss_size);
   ((*t)->context).uc_stack.ss_flags = 0;
@@ -86,9 +86,11 @@ extern void thread_yield(void){
 }
 
 extern int thread_join(thread_t thread, void **retval){
-	assert(thread_init);
+  assert(thread_init);
   //On le met en attente
-  current_thread->status= WAITING;	
+  current_thread->status= WAITING;	/* Address 0x164 is not stack'd, malloc'd or (recently) free'd
+					   0x080488d0 in thread_join (thread=0x41fe028, retval=0x422e548) at src/thread.c:91
+					 */
   //On met le thread en running si ce n'est déja fait
   thread->status=RUNNING;
   //On déclare que le prochain à exécuter après thread est current_thread
@@ -115,8 +117,10 @@ void thread_exit(void *retval){
   current_thread->retval=retval;
   thread_t tmp_t= current_thread;  
   current_thread=current_thread->next.stqe_next;  
-  if(current_thread){
-  	current_thread->status=READY;printf("boucle\n");
+  if(current_thread){ /*Conditional jump or move depends on uninitialised value(s)
+			Failed to read a valid object file image from memory.
+		       */
+    current_thread->status=READY;printf("boucle\n");
   }
 
   STAILQ_INSERT_TAIL(&queue_to_free,tmp_t,next);
