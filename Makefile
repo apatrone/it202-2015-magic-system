@@ -1,5 +1,5 @@
 CC = gcc
-CFLAGS = -Wall -Wextra -I. -g3 -o
+CFLAGS = -Wall -Wextra -I. -g3
 LIB_THREAD = -DUSE_PTHREAD -lpthread
 
 SRCDIR   = src
@@ -15,8 +15,8 @@ ECHOWHITE = echo -ne "\e[0m"
 
 binname = `basename $(tstfile) .c`
 
-compilewithpthread = $(CC) $(CFLAGS) $(BINDIR)/$(binname) $(tstfile) $(LIB_THREAD)
-compilewithourlib = $(CC) $(CFLAGS) $(BINDIR)/$(binname) $(tstfile) $(SRCTHREAD)
+compilewithpthread = $(CC) $(CFLAGS) -o $(BINDIR)/$(binname) $(tstfile) $(LIB_THREAD)
+compilewithourlib = $(CC) $(CFLAGS) -o $(BINDIR)/$(binname) $(tstfile) $(SRCTHREAD)
 
 inforeachwithpthread = echo "Compiling $(binname)"; $(compilewithpthread);
 inforeachwithourlib = echo "Compiling $(binname)"; $(compilewithourlib);
