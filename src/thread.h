@@ -56,6 +56,11 @@ extern int thread_join(thread_t thread, void **retval);
  */
 extern void thread_exit(void *retval); /* __attribute__ ((__noreturn__));*/
 
+
+extern void clean_finished_thread(void) __attribute__((destructor));
+
+extern  void kill_main_thread(void) __attribute__((destructor));
+
 #else /* USE_PTHREAD */
 
 /* Si on compile avec -DUSE_PTHREAD, ce sont les pthreads qui sont utilisés */
