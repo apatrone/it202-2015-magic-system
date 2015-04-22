@@ -1,12 +1,13 @@
 CC = gcc
-CFLAGS = -Wall -Wextra -I. -g3 -o
+CFLAGS = -Wall -Wextra -I. -g3
 LIB_THREAD = -DUSE_PTHREAD -lpthread
 
 SRCDIR   = src
 TSTDIR   = tst
-BINDIR   = bin
+BASEBINDIR   = bin
+PTHREADBINDIR = $(BASEBINDIR)/pthread
+OURLIBBINDIR = $(BASEBINDIR)/ourlib
 TSTLIST  := $(wildcard $(TSTDIR)/*.c)
-BINLIST  := $(wildcard $(BINDIR)/*)
 SRCTHREAD = $(SRCDIR)/thread.c
 
 ECHOGREEN = echo -ne "\e[32m"
@@ -15,14 +16,23 @@ ECHOWHITE = echo -ne "\e[0m"
 
 binname = `basename $(tstfile) .c`
 
-compilewithpthread = $(CC) $(CFLAGS) $(BINDIR)/$(binname) $(tstfile) $(LIB_THREAD)
-compilewithourlib = $(CC) $(CFLAGS) $(BINDIR)/$(binname) $(tstfile) $(SRCTHREAD)
+compilewithpthread = $(CC) $(CFLAGS) -o $(PTHREADBINDIR)/$(binname) $(tstfile) $(LIB_THREAD)
+compilewithourlib = $(CC) $(CFLAGS) -o $(OURLIBBINDIR)/$(binname) $(tstfile) $(SRCTHREAD)
 
 inforeachwithpthread = echo "Compiling $(binname)"; $(compilewithpthread);
 inforeachwithourlib = echo "Compiling $(binname)"; $(compilewithourlib);
 
 testbinary = $(BINDIR)/$(binfile)
 
+all:
+	@$(ECHOGREEN)
+	@echo -e "Compiling with pthread lib ..."
+	@$(ECHOWHITE)
+	@make -s with-pthread
+	@$(ECHOGREEN)
+	@echo -e "\nCompiling with our lib ..."
+	@$(ECHOWHITE)
+	@make -s with-ourlib
 
 with-ourlib:
 	@mkdir -p bin
@@ -40,11 +50,7 @@ test:
 	@$(ECHOWHITE)
 	@make -s clean
 
-	@$(ECHOGREEN)
-	@echo -e "\nCompiling ..."
-	@$(ECHOWHITE)
-	@#make -s with-ourlib
-	@make -s with-pthread
+	@make -s all
 
 	@$(ECHOGREEN)
 	@echo -e "\nTesting ..."
@@ -56,6 +62,6 @@ test:
 
 .PHONY: clean
 clean:
-	@rm -f $(BINDIR)/*
+	@$(foreach tstfile,$(TSTLIST),rm -f {$(OURLIBBINDIR),$(PTHREADBINDIR)}/$(binname))
 	@echo "Done !"
 
