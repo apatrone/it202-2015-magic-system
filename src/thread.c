@@ -16,27 +16,33 @@ struct threadqueue queue_to_free;  //à changer sans *
 thread_t current_thread;
 //thread_t thread_to_free;
 thread_t old_thread;
+thread_t main_thread;
 
 // Initialise la thread_queue
 
 
 extern void init_thread(thread_t *t){
-	*t = malloc(sizeof(thread_s));
-	getcontext(&((*t)->context));
-  ((*t)->context).uc_stack.ss_size=64*1024;
-  ((*t)->context).uc_stack.ss_sp = malloc((*t)->context.uc_stack.ss_size);
-  ((*t)->context).uc_stack.ss_flags = 0;
-  ((*t)->context).uc_link=NULL;
+	thread_s *thd = malloc(sizeof(thread_s));
 
+	getcontext(&(thd->context));
+  (thd->context).uc_stack.ss_size=64*1024;
+  (thd->context).uc_stack.ss_sp = malloc((thd->context).uc_stack.ss_size);
+  (thd->context).uc_stack.ss_flags = 0;
+  (thd->context).uc_link=NULL;
+  thd->retval=NULL;
 
+	*t = thd;
 }
 
 void libthread_init() {	  
-  	STAILQ_INIT(&thread_queue);
-  	STAILQ_INIT(&queue_to_free);
-		init_thread(&current_thread);
-		init_thread(&old_thread);
-  	thread_init = 1;
+	STAILQ_INIT(&thread_queue);
+	STAILQ_INIT(&queue_to_free);
+	//init_thread(&current_thread);
+	init_thread(&old_thread);
+	init_thread(&main_thread);
+	getcontext(&(main_thread->context));
+	current_thread=main_thread;
+	thread_init = 1;	
 }
 
 extern thread_t thread_self(){
@@ -54,10 +60,12 @@ extern int thread_create(thread_t *newthread, void *(*func)(void *), void *funca
   }
 
   thread_t t;
- 	init_thread(&t);
+  init_thread(&t);
+ 	
 
- 	makecontext(&(t->context), (void (*)(void))func, 1, funcarg); 
-  (t->status) = READY;
+	makecontext(&(t->context), (void (*)(void))func, 1, funcarg); 
+///	t->retval=func(funcarg);
+   (t->status) = READY;
 
   *newthread = t;
   STAILQ_INSERT_TAIL(&thread_queue, t, next); //erreur de seg ici
@@ -66,7 +74,7 @@ extern int thread_create(thread_t *newthread, void *(*func)(void *), void *funca
 }
 
 
-extern void thread_yield(void){
+extern int thread_yield(void){
 
   if(!thread_init){
     libthread_init();    
@@ -79,9 +87,14 @@ extern void thread_yield(void){
       current_thread = (&thread_queue)->stqh_first;
       (&thread_queue)->stqh_first = (&thread_queue)->stqh_first->next.stqe_next;
   }
-
+	else{	
+		 current_thread = main_thread;
+	}
   current_thread->status = RUNNING;
-  swapcontext(&(old_thread->context), &(current_thread->context));
+  int ret= swapcontext(&(old_thread->context), &(current_thread->context));
+  if(ret==0)
+  	return 0;
+  return -1;
 
 }
 
@@ -94,26 +107,31 @@ extern int thread_join(thread_t thread, void **retval){
   //On déclare que le prochain à exécuter après thread est current_thread
   thread->next.stqe_next = current_thread;
 
+	
+  printf("retval: %x\n", *retval);
   if(retval!=NULL){
     *retval=thread->retval;
-  }
+  }	
 
-  free((thread->context).uc_stack.ss_sp);
-  free(thread);
+	if(thread != main_thread){
+		free((thread->context).uc_stack.ss_sp);
+		free(thread);
+	}
 
-  if(!retval)
-      return 1;  //si pas d'erreur
-  return 0;
+	return 0;
 }
 
 
 
 void thread_exit(void *retval){
 	assert(thread_init);
-
+	printf("exit\n");
   current_thread->status= FINISHED;
   current_thread->retval=retval;
-  thread_t tmp_t= current_thread;  
+  printf("retval: %x\n", retval);
+  printf("->retval: %x\n", current_thread->retval);
+
+  thread_t tmp_t= current_thread;  printf("exit\n");
   current_thread=current_thread->next.stqe_next;  
   if(current_thread){
   	current_thread->status=READY;printf("boucle\n");
@@ -123,7 +141,7 @@ void thread_exit(void *retval){
   printf("exit\n");
   //Supprime t'on la tete de la queue? ou garde t'on tous les threads termines?
 
-  int rc=setcontext(&((&thread_queue)->stqh_first->context)); 
+  int rc=setcontext(&((thread_queue.stqh_first)->context)); 
   if(rc==-1)
       perror("Error: setcontext");
 
