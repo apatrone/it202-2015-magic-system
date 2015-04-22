@@ -37,7 +37,7 @@ extern int thread_create(thread_t *newthread, void *(*func)(void *), void *funca
 
 /* passer la main à un autre thread.
  */
-extern void thread_yield(void);
+extern int thread_yield(void);
 
 /* attendre la fin d'exécution d'un thread.
  * la valeur renvoyée par le thread est placée dans *retval.
@@ -54,6 +54,11 @@ extern int thread_join(thread_t thread, void **retval);
  * n'est pas correctement implémenté (il ne doit jamais retourner).
  */
 extern void thread_exit(void *retval); /* __attribute__ ((__noreturn__));*/
+
+
+extern void clean_finished_thread(void) __attribute__((destructor));
+
+extern  void kill_main_thread(void) __attribute__((destructor));
 
 #else /* USE_PTHREAD */
 
