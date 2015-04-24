@@ -7,7 +7,7 @@
 #include <errno.h>
 #include <stdio.h>
 #include <assert.h>
-#include <valgrind/valgrind.h>
+#include "valgrind.h"
 
 STAILQ_HEAD(threadqueue, thread_) ;
 
@@ -49,7 +49,6 @@ void init_thread_main(){
 void libthread_init() {	  //pas besoin d'allouer la pile pour le main thread car elle est déjà allouée
   STAILQ_INIT(&thread_queue);
   STAILQ_INIT(&queue_to_free);
-  //init_thread(&current_thread);
   init_thread_main(&main_thread);
   getcontext(&(main_thread->context));
   current_thread=main_thread;
@@ -131,8 +130,10 @@ int thread_join(thread_t thread, void **retval)
     }
     // Sinon on donne la main a un autre
     else {
-      current_thread = STAILQ_FIRST(&thread_queue);printf("join\n");
-      STAILQ_REMOVE_HEAD(&thread_queue, next);printf("join\n");
+		if(STAILQ_FIRST(&thread_queue)){
+		  current_thread = STAILQ_FIRST(&thread_queue);printf("join\n");
+		  STAILQ_REMOVE_HEAD(&thread_queue, next);printf("join\n");
+		 }
     }
     swapcontext(&(thread->context), &(current_thread->context));
   }
