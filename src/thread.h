@@ -75,6 +75,5 @@ extern  void kill_main_thread(void) __attribute__((destructor));
 #define thread_exit pthread_exit
 
 #endif /* USE_PTHREAD */
-
 #endif /* __THREAD_H__ */
 
