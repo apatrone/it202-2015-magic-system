@@ -87,18 +87,19 @@ int thread_yield(void){
   if(!thread_init){
     libthread_init();    
   } 	
-  current_thread->status = WAITING;
+  current_thread->status = READY;
   old_thread = current_thread;
 
   if((&thread_queue)->stqh_first!=NULL)
     {
-      current_thread = (&thread_queue)->stqh_first;
-      (&thread_queue)->stqh_first = (&thread_queue)->stqh_first->next.stqe_next;
+      current_thread = STAILQ_FIRST(&thread_queue);
+      STAILQ_REMOVE_HEAD(&thread_queue, next);
     }
   else{	
     current_thread = main_thread;
   }
   current_thread->status = RUNNING;
+  STAILQ_INSERT_TAIL(&thread_queue, old_thread, next);
   int ret= swapcontext(&(old_thread->context), &(current_thread->context));
   if(ret==0)
     return 0;
@@ -131,9 +132,10 @@ int thread_join(thread_t thread, void **retval)
     // Sinon on donne la main a un autre
     else {
 		if(STAILQ_FIRST(&thread_queue)){
-		  current_thread = STAILQ_FIRST(&thread_queue);printf("join\n");
-		  STAILQ_REMOVE_HEAD(&thread_queue, next);printf("join\n");
-		 }
+		  current_thread = STAILQ_FIRST(&thread_queue);
+		  STAILQ_REMOVE_HEAD(&thread_queue, next);
+		 }//pas de else?
+		 
     }
     swapcontext(&(thread->context), &(current_thread->context));
   }
@@ -149,6 +151,7 @@ int thread_join(thread_t thread, void **retval)
   
   // On libere les ressources allouées a thread
   if(thread != main_thread){
+  	VALGRIND_STACK_DEREGISTER(thread->valgrind_stack_id);
     free((thread->context).uc_stack.ss_sp);
   }
   free(thread);
