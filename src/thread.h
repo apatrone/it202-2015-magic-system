@@ -23,6 +23,7 @@ typedef struct thread_ {
   status_e status;
   struct thread_ * waiting_by;
   STAILQ_ENTRY(thread_) next;
+  int valgrind_stack_id;
 } thread_s;
 
 typedef thread_s * thread_t;  //the void* means it can point to any data type. you have to cast it when using it
