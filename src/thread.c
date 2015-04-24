@@ -90,7 +90,7 @@ int thread_yield(void){
   current_thread->status = READY;
   old_thread = current_thread;
 
-  if((&thread_queue)->stqh_first!=NULL)
+  if(STAILQ_FIRST(&thread_queue)!=NULL)
     {
       current_thread = STAILQ_FIRST(&thread_queue);
       STAILQ_REMOVE_HEAD(&thread_queue, next);
