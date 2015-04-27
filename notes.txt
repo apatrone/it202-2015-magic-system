@@ -31,3 +31,11 @@ quand on fait le makecontext il faut pas passer direct la fonction de l'utilisat
 
 rapport: comparer performances entre pthread et notre librairie (ex: test avec fibonacci). quels sont les avantages et les inconvenients des 2 librairies? 
 pthread a plusieurs threads noyaux (affichage non deterministe) et nous non
+
+
+valgrind --db-attach=yes --track-origins=yes -v ./bin/ourlib/01-main 
+alias valgrind="valgrind --track-origins=yes -v --leak-check=yes --show-reachable=yes"
+valgrind --db-attach=yes ./bin/ourlib/01-main 
+
+
+gdb --args ./bin/ourlib/02-switch 
