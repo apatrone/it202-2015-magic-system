@@ -1,0 +1,31 @@
+11-join: tst/11-join.c:40: main: Assertion `res == (void*) 0xdeadbeef' failed.
+Aborted (core dumped)
+
+-----------------------------------------
+
+*** Error in `./12-join-main': double free or corruption (top): 0x089b5008 ***
+Aborted (core dumped)
+
+-----------------------------------------------------
+
+*** Error in `./21-create-many': double free or corruption (out): 0x080782f8 ***
+Aborted (core dumped)
+
+-------------------------------------------------------
+
+22-create-many-recursive: tst/22-create-many-recursive.c:29: thfunc: Assertion `res == _nb-1' failed.
+Aborted (core dumped)
+
+---------------------------------------------------------
+
+./31-switch-many 
+Segmentation fault (core dumped)
+
+---------------------------------------------------------
+
+32-switch-many-join: tst/32-switch-many-join.c:31: thfunc: Assertion `res == _nbth-1' failed.
+Aborted (core dumped)
+
+------------------------------------------------------------
+
+
