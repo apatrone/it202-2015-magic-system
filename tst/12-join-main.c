@@ -20,7 +20,7 @@ static void * thfunc(void *dummy __attribute__((unused)))
 {
   void *res;
   int err;
-
+  
   err = thread_join(thmain, &res);
   assert(!err);
   assert(res == (void*) 0xdeadbeef);

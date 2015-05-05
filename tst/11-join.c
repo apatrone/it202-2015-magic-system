@@ -16,6 +16,7 @@
 
 static void * thfunc(void *dummy __attribute__((unused)))
 {
+  printf("bonjour thread \n");
   thread_exit((void*)0xdeadbeef);
 }
 
@@ -37,6 +38,7 @@ int main()
 
   err = thread_join(th, &res);
   assert(!err);
+  printf("\n res: %s adr %p\n", (char*)res, &res);
   assert(res == (void*) 0xdeadbeef);
 
   err = thread_join(th2, &res);
