@@ -22,7 +22,12 @@ compilewithourlib = $(CC) $(CFLAGS) -o $(OURLIBBINDIR)/$(binname) $(tstfile) $(S
 inforeachwithpthread = echo "Compiling $(binname)"; $(compilewithpthread);
 inforeachwithourlib = echo "Compiling $(binname)"; $(compilewithourlib);
 
+
+CURRENTOURLIBOUTPUT = /tmp/currentourliboutput.txt
+CURRENTPTHREADOUTPUT = /tmp/currentpthreadoutput.txt
+
 testbinary = $(BINDIR)/$(binfile)
+
 
 all:
 	@$(ECHOGREEN)
@@ -55,7 +60,19 @@ test:
 	@$(ECHOGREEN)
 	@echo -e "\nTesting ..."
 	@$(ECHOWHITE)
-	@$(foreach binfile,$(BINLIST),$(testbinary)))
+	#@$(foreach binfile,$(BINLIST),$(testbinary)))
+	@$(OURLIBBINDIR)/01-main > $(CURRENTOURLIBOUTPUT)
+	@$(PTHREADBINDIR)/01-main > $(CURRENTPTHREADOUTPUT)
+	
+	@diff -q $(CURRENTPTHREADOUTPUT) $(CURRENTOURLIBOUTPUT) 1>/dev/null
+	#@[[ $? = "0" ]] && echo "same" || echo "different"
+
+	#if [[ $? == "0" ]]
+	#then
+		#echo "The same"
+	#else
+		#echo "Not the same"
+	#fi
 
 
 
