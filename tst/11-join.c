@@ -38,7 +38,6 @@ int main()
 
   err = thread_join(th, &res);
   assert(!err);
-  printf("\n res: %s adr %p\n", (char*)res, &res);
   assert(res == (void*) 0xdeadbeef);
 
   err = thread_join(th2, &res);
