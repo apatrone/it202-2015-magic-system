@@ -16,7 +16,7 @@
 
 static void * thfunc(void *dummy __attribute__((unused)))
 {
-  printf("bonjour thread \n");
+
   thread_exit((void*)0xdeadbeef);
 }
 
