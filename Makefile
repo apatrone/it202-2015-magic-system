@@ -28,32 +28,96 @@ compilewithourlib = $(CC) $(CFLAGS) -o $(OURLIBBINDIR)/$(binname) $(tstfile) $(S
 inforeachwithpthread = echo "Compiling $(binname)"; $(compilewithpthread);
 inforeachwithourlib = echo "Compiling $(binname)"; $(compilewithourlib);
 
-testallbinary = echo $(binname) | cut -c1-1;$(ECHOBLUE); echo "testing $(binname)"; $(ECHOWHITE); valgrind $(OURLIBBINDIR)/$(binname) $(args) 2>&1 >/dev/null | grep "ERROR SUMMARY" | cut -c25-1000 ;
+shortbinarytest = $(ECHOBLUE); echo "testing $(binname)"; $(ECHOWHITE); valgrind $(OURLIBBINDIR)/$(binname) $(args) 2>&1 >/dev/null | grep "ERROR SUMMARY" | cut -c25-1000 ;
 
 fullbinarytest = valgrind $(VALGRINDFLAGS) $(OURLIBBINDIR)/
 
 
 
-firstcharofbinname = $(binname) | cut -c1-1
-ifeq ($(firstcharofbinname), 0)
-	args = "";
-endif
-ifeq ($(firstcharofbinname), 1)
-	args = "";
-endif
-ifeq ($(firstcharofbinname), 2)
-	args = "5";
-endif
-ifeq ($(firstcharofbinname), 3)
-	args = "5 23";
-endif
-ifeq ($(firstcharofbinname), 5)
-	args = "4";
-endif
 
 
-i:
-	@$(foreach tstfile,$(TSTLIST), $(testallbinary))
+
+with-ourlib:
+	@$(ECHOGREEN)
+	@echo -e "\nCompiling with our lib ..."
+	@$(ECHOWHITE)
+	@mkdir -p bin/ourlib
+	@$(foreach tstfile,$(TSTLIST),$(inforeachwithourlib))
+	@echo "Done !"
+
+
+all:
+	@make -s with-pthread
+	@make -s with-ourlib
+
+
+with-pthread:
+	@$(ECHOGREEN)
+	@echo -e "Compiling with pthread lib ..."
+	@$(ECHOWHITE)
+	@mkdir -p bin/pthread
+	@$(foreach tstfile,$(TSTLIST),$(inforeachwithpthread))
+	@echo "Done !"
+
+
+test-all:
+	@$(ECHOGREEN)
+	@echo -e "\nTesting ..."
+	@$(ECHOWHITE)
+
+	@$(eval binname := "01-main")
+	@$(eval args := "")
+	@$(shortbinarytest)
+
+	@$(eval binname := "02-switch")
+	@$(eval args := "")
+	@$(shortbinarytest)
+
+	@$(eval binname := "11-join")
+	@$(eval args := "")
+	@$(shortbinarytest)
+
+	@$(eval binname := "12-join-main")
+	@$(eval args := "")
+	@$(shortbinarytest)
+
+	@$(eval binname := "21-create-many")
+	@$(eval args := "5")
+	@$(shortbinarytest)
+
+	@$(eval binname := "22-create-many-recursive")
+	@$(eval args := "5")
+	@$(shortbinarytest)
+
+	@$(eval binname := "23-create-many-once")
+	@$(eval args := "5")
+	@$(shortbinarytest)
+
+	@$(eval binname := "31-switch-many")
+	@$(eval args := "5 23")
+	@$(shortbinarytest)
+
+	@$(eval binname := "32-switch-many-join")
+	@$(eval args := "5 23")
+	@$(shortbinarytest)
+
+	@$(eval binname := "51-fibonacci")
+	@$(eval args := "4")
+	@$(shortbinarytest)
+	@echo "Done !"
+
+
+test:
+	@$(fullbinarytest)$(bin) $(arg)
+
+
+.PHONY: clean
+clean:
+	@$(ECHOGREEN)
+	@echo "Cleaning ..."
+	@$(ECHOWHITE)
+	@$(foreach tstfile,$(TSTLIST),rm -f {$(OURLIBBINDIR),$(PTHREADBINDIR)}/$(binname))
+	@echo "Done !"
 
 
 .PHONY: help
@@ -88,47 +152,3 @@ help:
 	@$(ECHOWHITE)
 	@echo -e "\tPerform a deep test on the given binary with the given argument (do not write 'arg=' if the binary do not need an argument)"
 	@echo -e "\t Example: 'make test bin=21-create-many arg=5'"
-
-
-
-
-
-all:
-	@make -s with-pthread
-	@make -s with-ourlib
-
-with-ourlib:
-	@$(ECHOGREEN)
-	@echo -e "\nCompiling with our lib ..."
-	@$(ECHOWHITE)
-	@mkdir -p bin/ourlib
-	@$(foreach tstfile,$(TSTLIST),$(inforeachwithourlib))
-	@echo "Done !"
-
-with-pthread:
-	@$(ECHOGREEN)
-	@echo -e "Compiling with pthread lib ..."
-	@$(ECHOWHITE)
-	@mkdir -p bin/pthread
-	@$(foreach tstfile,$(TSTLIST),$(inforeachwithpthread))
-	@echo "Done !"
-
-test-all:
-	@$(ECHOGREEN)
-	@echo -e "\nTesting ..."
-	@$(ECHOWHITE)
-	@$(foreach tstfile,$(TSTLIST),$(testallbinary))
-	@echo "Done !"
-
-test:
-	@$(fullbinarytest)$(bin) $(arg)
-
-
-.PHONY: clean
-clean:
-	@$(ECHOGREEN)
-	@echo "Cleaning ..."
-	@$(ECHOWHITE)
-	@$(foreach tstfile,$(TSTLIST),rm -f {$(OURLIBBINDIR),$(PTHREADBINDIR)}/$(binname))
-	@echo "Done !"
-
