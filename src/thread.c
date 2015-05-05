@@ -14,7 +14,7 @@ STAILQ_HEAD(threadqueue, thread_) ;
 int thread_init = 0;
 
 struct threadqueue thread_queue;
-struct threadqueue queue_to_free;  //à changer sans *
+struct threadqueue queue_to_free;
 thread_t current_thread;
 thread_t old_thread;
 thread_t main_thread;
@@ -26,7 +26,7 @@ void init_thread(thread_t *t){
   thread_s *thd = malloc(sizeof(thread_s));
 
   getcontext(&(thd->context));
- 	(thd->context).uc_stack.ss_size=64*1024;
+  (thd->context).uc_stack.ss_size=64*1024;
   (thd->context).uc_stack.ss_sp = malloc((thd->context).uc_stack.ss_size);
   thd->valgrind_stack_id = VALGRIND_STACK_REGISTER((thd->context).uc_stack.ss_sp,(thd->context).uc_stack.ss_sp + (thd->context).uc_stack.ss_size);
   (thd->context).uc_stack.ss_flags = 0;
@@ -117,12 +117,14 @@ int thread_join(thread_t thread, void **retval)
   } 
   // Si non, c'est nous qui l'attendons et personne d'autre
   else {
- 	 current_thread->status = WAITING;
- 	 thread->waiting_by = current_thread;
+    current_thread->status = WAITING;
+    thread->waiting_by = current_thread;
   }
   
   // Est-ce que le thread attendu est fini ?
   if(thread->status != FINISHED) {
+    old_thread = current_thread;
+
     // Si le thread est ready, on lui donne la main pour finir au plus tot
     if (thread->status == READY) {
       STAILQ_REMOVE( &thread_queue, thread, thread_, next );
@@ -135,13 +137,12 @@ int thread_join(thread_t thread, void **retval)
 	STAILQ_REMOVE_HEAD(&thread_queue, next);
       }//pas de else?
     }
-    swapcontext(&(thread->context), &(current_thread->context));
+    assert( old_thread != current_thread );
+    swapcontext(&(old_thread->context), &(current_thread->context));
   }
 	
-  printf("thread->status: %d\n", (int)thread->status);
   // Normalement on ne reviens ici que si le thread est fini
-  
-  thread->status = FINISHED;
+  printf("thread->status: %d\n", (int)thread->status);
   assert( thread->status == FINISHED );
  
   // Recupere la valeur de retour
@@ -152,9 +153,9 @@ int thread_join(thread_t thread, void **retval)
   
   // On libere les ressources allouées a thread
   if(thread != main_thread ){
-  	VALGRIND_STACK_DEREGISTER(thread->valgrind_stack_id);
+    VALGRIND_STACK_DEREGISTER(thread->valgrind_stack_id);
     free((thread->context).uc_stack.ss_sp);
-    }
+  }
   free(thread);
 
   return 0;
@@ -171,16 +172,21 @@ void thread_exit(void *retval) {
   
   // Il y a un thread qui m'attend, je lui donne la main
   if(tmp_t->waiting_by){
-  	fprintf(stderr, "Je donne la main\n");
+    fprintf(stderr, "Je donne la main\n");
     current_thread = tmp_t->waiting_by;
+    current_thread->status= READY;
   }    
   // Sinon je donne la main au premier qui est ready
-  else{
-  	fprintf(stderr, "Je donne la main\n");
-    current_thread = STAILQ_FIRST(&thread_queue);
+  else if (STAILQ_FIRST(&thread_queue)){
+    fprintf(stderr, "Je donne la main\n");
+    current_thread  = STAILQ_FIRST(&thread_queue);
     STAILQ_REMOVE_HEAD(&thread_queue, next);
   }
 
+  else 
+    current_thread= main_thread;
+
+  printf("current thread= %d\n", current_thread->status);
   STAILQ_INSERT_TAIL(&queue_to_free,tmp_t,next);
   tmp_t->status = FINISHED;
 
