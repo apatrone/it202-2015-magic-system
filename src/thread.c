@@ -21,7 +21,6 @@ thread_t main_thread;
 
 // Initialise la thread_queue
 
-
 void init_thread(thread_t *t){
   thread_s *thd = malloc(sizeof(thread_s));
 
@@ -54,6 +53,14 @@ void libthread_init() {	  //pas besoin d'allouer la pile pour le main thread car
   thread_init = 1;	
 }
 
+
+static void wrap(void *(*func)(void *),void *funcarg) {
+	void *retval;
+	retval =func(funcarg);
+	thread_exit(retval);
+}
+
+
 thread_t thread_self(){
   if(!thread_init){
     libthread_init();
@@ -71,7 +78,7 @@ int thread_create(thread_t *newthread, void *(*func)(void *), void *funcarg){
   thread_t t;
   init_thread(&t);
  	
-  makecontext(&(t->context), (void (*)(void))func, 1, funcarg); 
+  makecontext(&(t->context), (void (*)(void))wrap, 2, func, funcarg); 
   (t->status) = READY;
 
   *newthread = t;
@@ -98,7 +105,9 @@ int thread_yield(void){
     current_thread = main_thread;
   }
   current_thread->status = RUNNING;
-  STAILQ_INSERT_TAIL(&thread_queue, old_thread, next);
+  if(old_thread!=main_thread) 
+    STAILQ_INSERT_TAIL(&thread_queue, old_thread, next);
+  
   int ret= swapcontext(&(old_thread->context), &(current_thread->context));
   if(ret==0)
     return 0;
@@ -127,7 +136,8 @@ int thread_join(thread_t thread, void **retval)
 
     // Si le thread est ready, on lui donne la main pour finir au plus tot
     if (thread->status == READY) {
-      STAILQ_REMOVE( &thread_queue, thread, thread_, next );
+      if(thread!=main_thread)
+	 STAILQ_REMOVE( &thread_queue, thread, thread_, next );
       current_thread = thread;
     }
     // Sinon on donne la main a un autre
@@ -187,9 +197,10 @@ void thread_exit(void *retval) {
     current_thread= main_thread;
 
   printf("current thread= %d\n", current_thread->status);
-  STAILQ_INSERT_TAIL(&queue_to_free,tmp_t,next);
-  tmp_t->status = FINISHED;
-
+  if(tmp_t!=main_thread){
+    STAILQ_INSERT_TAIL(&queue_to_free,tmp_t,next);
+    tmp_t->status = FINISHED;
+  }
   assert(current_thread->status == READY);
 
   //Supprime t'on la tete de la queue? ou garde t'on tous les threads termines?
