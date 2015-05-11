@@ -1,4 +1,3 @@
-
 #include "thread.h"
 #include <sys/queue.h>
 #include <ucontext.h>
@@ -37,7 +36,7 @@ void init_thread(thread_t *t){
 }
 
 void init_thread_main(){
-  fprintf(stderr,"thread_init_main called !!!!!\n ");
+  printf("thread_init_main called !!!!!\n ");
   main_thread = malloc(sizeof(thread_s));
   getcontext(&(main_thread->context));
   main_thread->retval = NULL;
@@ -45,7 +44,7 @@ void init_thread_main(){
   main_thread->waiting_by = NULL;
 }
 
-void libthread_init() {	  //pas besoin d'allouer la pile pour le main thread car elle est d�j� allou�e
+void libthread_init() {	  //pas besoin d'allouer la pile pour le main thread car elle est déjà allouée
   STAILQ_INIT(&thread_queue);
   STAILQ_INIT(&queue_to_free);
   init_thread_main(&main_thread);
@@ -89,7 +88,7 @@ int thread_create(thread_t *newthread, void *(*func)(void *), void *funcarg){
 }
 
 
-int thread_yield(void){ //problemme dans le 01-main
+int thread_yield(void){
 
   if(!thread_init){
     libthread_init();
@@ -97,26 +96,26 @@ int thread_yield(void){ //problemme dans le 01-main
 
   old_thread = current_thread;
 
-  if(STAILQ_FIRST(&thread_queue) != NULL)
+  if(STAILQ_FIRST(&thread_queue)!=NULL)
     {
       current_thread = STAILQ_FIRST(&thread_queue);
       STAILQ_REMOVE_HEAD(&thread_queue, next);
     }
 
-  current_thread->status = RUNNING;
-  // if (old_thread != current_thread ) {
+  //current_thread->status = RUNNING;
+  if (old_thread != current_thread ) {
     STAILQ_INSERT_TAIL(&thread_queue, old_thread, next);
-    int ret = swapcontext(&(old_thread->context), &(current_thread->context));
-    if(ret == 0)
+    int ret= swapcontext(&(old_thread->context), &(current_thread->context));
+    if(ret==0)
       return 0;
-    // }
-    else
-      return -1;
+  }
+  return -1;
+
 }
 
 int thread_join(thread_t thread, void **retval)
 {
-  fprintf(stderr, "thread_init %i\n", thread_init);
+  printf("thread_init %i\n", thread_init);
   assert(thread_init);
 
   // Est-ce qu'il est attendu par quelqu'un d'autre ? (si oui on quitte)
@@ -132,13 +131,11 @@ int thread_join(thread_t thread, void **retval)
   // Est-ce que le thread attendu est fini ?
   if(thread->status != FINISHED) {
     old_thread = current_thread;
-    
+
     // Si le thread est ready, on lui donne la main pour finir au plus tot
     if (thread->status == READY) {
       STAILQ_REMOVE( &thread_queue, thread, thread_, next );
       current_thread = thread;
-      //changement du status ici en FINISHED
-     
     }
     // Sinon on donne la main a un autre
     else {
@@ -153,7 +150,7 @@ int thread_join(thread_t thread, void **retval)
   }
 
   // Normalement on ne reviens ici que si le thread est fini
-  fprintf(stderr, "thread->status: %d\n", (int)thread->status);
+  printf("thread->status: %d\n", (int)thread->status);
   assert( thread->status == FINISHED );
 
   // Recupere la valeur de retour
@@ -161,7 +158,7 @@ int thread_join(thread_t thread, void **retval)
     *retval = thread->retval;
   }
 
-  // On libere les ressources allouees a thread
+  // On libere les ressources allouées a thread
   if(thread != main_thread ){
     VALGRIND_STACK_DEREGISTER(thread->valgrind_stack_id);
     free((thread->context).uc_stack.ss_sp);
@@ -175,7 +172,7 @@ int thread_join(thread_t thread, void **retval)
 
 void thread_exit(void *retval) {
   assert(thread_init);
-  fprintf(stderr, "exit\n");
+  printf("exit\n");
 
   current_thread->retval = retval;
   current_thread->status = FINISHED;
@@ -199,7 +196,7 @@ void thread_exit(void *retval) {
     exit(0);
   }
 
-  fprintf(stderr, "current thread= %d\n", current_thread->status);
+  printf("current thread= %d\n", current_thread->status);
   assert(current_thread->status == READY);
 
   int rc = setcontext( &(current_thread->context));
@@ -210,7 +207,7 @@ void thread_exit(void *retval) {
 void clean_finished_thread(void) __attribute__((destructor));
 void clean_finished_thread(){
   if(current_thread != main_thread && current_thread != NULL){
-    fprintf(stderr, "on free le thread\n");
+    printf("on free le thread\n");
     VALGRIND_STACK_DEREGISTER(current_thread->valgrind_stack_id);
     //free((current_thread->context).uc_stack.ss_sp);
   }
