@@ -1,6 +1,8 @@
 #include <stdio.h>
 #include <assert.h>
 #include "thread.h"
+#include <sys/time.h>
+
 
 /* test du join, avec ou sans thread_exit.
  *
@@ -31,6 +33,10 @@ int main()
   int err;
   void *res = NULL;
 
+  struct timeval start, end;
+  gettimeofday(&start, NULL);
+
+
   err = thread_create(&th, thfunc, NULL);
   assert(!err);
   err = thread_create(&th2, thfunc2, NULL);
@@ -45,5 +51,11 @@ int main()
   assert(res == (void*) 0xbeefdead);
 
   printf("join OK\n");
+
+  gettimeofday(&end, NULL);
+
+  printf("time: %ld µs\n", ((end.tv_sec * 1000000 + end.tv_usec)
+  - (start.tv_sec * 1000000 + start.tv_usec)));
+
   return 0;
 }
