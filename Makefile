@@ -125,7 +125,7 @@ help:
 	@$(ECHOBLUE)
 	@echo help
 	@$(ECHOWHITE)
-	@echo -e "\tAffiche cette aide et quitte"
+	@echo -e "\tPrint help (this message) and exit
 
 	@$(ECHOBLUE)
 	@echo all
