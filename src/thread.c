@@ -31,7 +31,7 @@ void init_thread(thread_t *t){
   (thd->context).uc_link = NULL;
   thd->waiting_by=NULL;
   thd->retval=NULL;
-
+  thd->priority=0;
   *t = thd;
 }
 
@@ -69,6 +69,23 @@ thread_t thread_self(){
   return current_thread;
 }
 
+
+void insertion( thread_t t){
+  int i=t->priority;
+  thread_t tmp=STAILQ_FIRST(&thread_queue);
+  if(!tmp)
+    STAILQ_INSERT_HEAD(&thread_queue, t, next);
+  else  if(i>tmp->priority){
+    STAILQ_INSERT_HEAD(&thread_queue, t, next);
+  }
+  else{
+    while((i<=tmp->priority)&&(STAILQ_NEXT(tmp, next)!=NULL)){
+      tmp= STAILQ_NEXT(tmp, next);
+    }
+    STAILQ_INSERT_AFTER(&thread_queue, tmp, t, next);
+  }
+}
+
 int thread_create(thread_t *newthread, void *(*func)(void *), void *funcarg){
 
   if(!thread_init){
@@ -82,14 +99,16 @@ int thread_create(thread_t *newthread, void *(*func)(void *), void *funcarg){
   (t->status) = READY;
 
   *newthread = t;
-  STAILQ_INSERT_TAIL(&thread_queue, t, next);
+  insertion(t);
 
   return 0;
 }
 
 
-int thread_yield(void){
 
+
+int thread_yield(void){
+  
   if(!thread_init){
     libthread_init();
   }
@@ -104,10 +123,10 @@ int thread_yield(void){
 
   //current_thread->status = RUNNING;
   if (old_thread != current_thread ) {
-    STAILQ_INSERT_TAIL(&thread_queue, old_thread, next);
+    insertion(old_thread);
     int ret= swapcontext(&(old_thread->context), &(current_thread->context));
     if(ret==-1)
-			return -1;
+      return -1;
 
   }
   return 0;
