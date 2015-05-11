@@ -1,5 +1,6 @@
 #include <stdio.h>
 #include <assert.h>
+#include <sys/time.h>
 #include "thread.h"
 
 /* test du thread_self et yield du main seul.
@@ -16,6 +17,10 @@ int main()
 {
   int err, i;
 
+
+  struct timeval start, end;
+  gettimeofday(&start, NULL);
+
   for(i=0; i<10; i++) {
     printf("le main yield tout seul\n");
     err = thread_yield();
@@ -23,6 +28,12 @@ int main()
   }
 
   printf("le main est %p\n", (void*) thread_self());
+
+  gettimeofday(&end, NULL);
+
+  printf("time: %ld µs\n", ((end.tv_sec * 1000000 + end.tv_usec)
+  - (start.tv_sec * 1000000 + start.tv_usec)));
+
 
   return 0;
 }
