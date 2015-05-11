@@ -7,12 +7,9 @@
 #include <stdio.h>
 #include <assert.h>
 #include "valgrind.h"
-#include <sys/time.h>
-#define PRIORITY 0
 
 STAILQ_HEAD(threadqueue, thread_) ;
-struct itimerval *timeslice = {{1,1000000},{1,1000000}}
-struct itimerval *timer = setitimer(0, timeslice, NULL);
+
 int thread_init = 0;
 
 struct threadqueue thread_queue;
@@ -34,12 +31,12 @@ void init_thread(thread_t *t){
   (thd->context).uc_link = NULL;
   thd->waiting_by=NULL;
   thd->retval=NULL;
-  thd->priority=0;
+
   *t = thd;
 }
 
 void init_thread_main(){
-  //  printf("thread_init_main called !!!!!\n ");
+  printf("thread_init_main called !!!!!\n ");
   main_thread = malloc(sizeof(thread_s));
   getcontext(&(main_thread->context));
   main_thread->retval = NULL;
@@ -72,23 +69,6 @@ thread_t thread_self(){
   return current_thread;
 }
 
-
-void insertion( thread_t t){
-  int i=t->priority;
-  thread_t tmp=STAILQ_FIRST(&thread_queue);
-  if(!tmp)
-    STAILQ_INSERT_HEAD(&thread_queue, t, next);
-  else  if(i>tmp->priority){
-    STAILQ_INSERT_HEAD(&thread_queue, t, next);
-  }
-  else{
-    while((i<=tmp->priority)&&(STAILQ_NEXT(tmp, next)!=NULL)){
-      tmp= STAILQ_NEXT(tmp, next);
-    }
-    STAILQ_INSERT_AFTER(&thread_queue, tmp, t, next);
-  }
-}
-
 int thread_create(thread_t *newthread, void *(*func)(void *), void *funcarg){
 
   if(!thread_init){
@@ -102,19 +82,14 @@ int thread_create(thread_t *newthread, void *(*func)(void *), void *funcarg){
   (t->status) = READY;
 
   *newthread = t;
-  if(PRIORITY==1)
-    insertion(t);
-  else 
-    STAILQ_INSERT_TAIL(&thread_queue, t, next);
+  STAILQ_INSERT_TAIL(&thread_queue, t, next);
 
   return 0;
 }
 
 
-
-
 int thread_yield(void){
-  
+
   if(!thread_init){
     libthread_init();
   }
@@ -128,15 +103,13 @@ int thread_yield(void){
     }
 
   //current_thread->status = RUNNING;
-  if (old_thread != current_thread ) {   
-    if(PRIORITY==1)
-      insertion(old_thread);
-    else
-      STAILQ_INSERT_TAIL(&thread_queue, old_thread, next);
-    setitimer(0,timeslice,timer);
+  if (old_thread != current_thread ) {
+    STAILQ_INSERT_TAIL(&thread_queue, old_thread, next);
     int ret= swapcontext(&(old_thread->context), &(current_thread->context));
-    if(ret==-1)
-      return -1;
+    if(ret!=-1)
+      return 0;
+		else 
+			return -1;
 
   }
   return 0;
@@ -145,7 +118,7 @@ int thread_yield(void){
 
 int thread_join(thread_t thread, void **retval)
 {
-  //  printf("thread_init %i\n", thread_init);
+  printf("thread_init %i\n", thread_init);
   assert(thread_init);
 
   // Est-ce qu'il est attendu par quelqu'un d'autre ? (si oui on quitte)
@@ -175,12 +148,12 @@ int thread_join(thread_t thread, void **retval)
       }//pas de else?
     }
     assert( old_thread != current_thread );
-    setitimer(0,timeslice ,timer );
+
     swapcontext(&(old_thread->context), &(current_thread->context));
   }
 
   // Normalement on ne reviens ici que si le thread est fini
-  //  printf("thread->status: %d\n", (int)thread->status);
+  printf("thread->status: %d\n", (int)thread->status);
   assert( thread->status == FINISHED );
 
   // Recupere la valeur de retour
@@ -202,7 +175,7 @@ int thread_join(thread_t thread, void **retval)
 
 void thread_exit(void *retval) {
   assert(thread_init);
-  //  printf("exit\n");
+  printf("exit\n");
 
   current_thread->retval = retval;
   current_thread->status = FINISHED;
@@ -211,13 +184,13 @@ void thread_exit(void *retval) {
 
   // Il y a un thread qui m'attend, je lui donne la main
   if(current_thread->waiting_by){
-    // fprintf(stderr, "Je donne la main\n");
+    fprintf(stderr, "Je donne la main\n");
     current_thread = current_thread->waiting_by;
     current_thread->status = READY;
   }
   // Sinon je donne la main au premier qui est ready
   else if (STAILQ_FIRST(&thread_queue)){
-    //    fprintf(stderr, "Je donne la main\n");
+    fprintf(stderr, "Je donne la main\n");
     current_thread = STAILQ_FIRST(&thread_queue);
     STAILQ_REMOVE_HEAD(&thread_queue, next);
   }
@@ -226,7 +199,7 @@ void thread_exit(void *retval) {
     exit(0);
   }
 
-  //  printf("current thread= %d\n", current_thread->status);
+  printf("current thread= %d\n", current_thread->status);
   assert(current_thread->status == READY);
 
   int rc = setcontext( &(current_thread->context));
@@ -237,7 +210,7 @@ void thread_exit(void *retval) {
 void clean_finished_thread(void) __attribute__((destructor));
 void clean_finished_thread(){
   if(current_thread != main_thread && current_thread != NULL){
-    //    printf("on free le thread\n");
+    printf("on free le thread\n");
     VALGRIND_STACK_DEREGISTER(current_thread->valgrind_stack_id);
     //free((current_thread->context).uc_stack.ss_sp);
   }
