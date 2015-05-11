@@ -8,7 +8,7 @@ long long index = 0;
 void * loop(void * unused)
 {
   while(1)
-    ++glob;
+    ++index;
 }
 
 int main()
