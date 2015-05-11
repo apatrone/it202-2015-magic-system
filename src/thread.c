@@ -7,9 +7,12 @@
 #include <stdio.h>
 #include <assert.h>
 #include "valgrind.h"
+#include <sys/time.h>
+
 
 STAILQ_HEAD(threadqueue, thread_) ;
-
+struct itimerval *timeslice = {{1,1000000},{1,1000000}}
+struct itimerval *timer = setitimer(0, timeslice, NULL);
 int thread_init = 0;
 
 struct threadqueue thread_queue;
@@ -103,8 +106,9 @@ int thread_yield(void){
     }
 
   //current_thread->status = RUNNING;
-  if (old_thread != current_thread ) {
+  if (old_thread != current_thread ) {   
     STAILQ_INSERT_TAIL(&thread_queue, old_thread, next);
+    timer = setitimer(0, timeslice, timer); 
     int ret= swapcontext(&(old_thread->context), &(current_thread->context));
     if(ret==-1)
 			return -1;
@@ -146,7 +150,7 @@ int thread_join(thread_t thread, void **retval)
       }//pas de else?
     }
     assert( old_thread != current_thread );
-
+    timer = setitimer(0,timeslice ,timer );
     swapcontext(&(old_thread->context), &(current_thread->context));
   }
 
