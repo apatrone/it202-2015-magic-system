@@ -106,10 +106,11 @@ int thread_yield(void){
   if (old_thread != current_thread ) {
     STAILQ_INSERT_TAIL(&thread_queue, old_thread, next);
     int ret= swapcontext(&(old_thread->context), &(current_thread->context));
-    if(ret==0)
-      return 0;
+    if(ret==-1)
+			return -1;
+
   }
-  return -1;
+  return 0;
 
 }
 
