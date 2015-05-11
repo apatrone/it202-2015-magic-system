@@ -123,6 +123,11 @@ clean:
 .PHONY: help
 help:
 	@$(ECHOBLUE)
+	@echo help
+	@$(ECHOWHITE)
+	@echo -e "\tAffiche cette aide et quitte"
+
+	@$(ECHOBLUE)
 	@echo all
 	@$(ECHOWHITE)
 	@echo -e "\tCompile all the test files with our lib and the pthread lib"
@@ -152,8 +157,3 @@ help:
 	@$(ECHOWHITE)
 	@echo -e "\tPerform a deep test on the given binary with the given argument (do not write 'arg=' if the binary do not need an argument)"
 	@echo -e "\t Example: 'make test bin=21-create-many arg=5'"
-
-	@$(ECHOBLUE)
-	@echo help
-	@$(ECHOWHITE)
-	@echo -e "\tAffiche cette aide et quitte"
