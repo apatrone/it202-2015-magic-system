@@ -14,7 +14,7 @@ void * loop(void * unused)
 int main()
 {
   int i = 0;
-  thread th;
+  thread_t th;
   thread_create(&th, loop, NULL);
 
 	for(i = 0; i < 10; ++i)
