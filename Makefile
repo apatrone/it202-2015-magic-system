@@ -123,6 +123,11 @@ clean:
 .PHONY: help
 help:
 	@$(ECHOBLUE)
+	@echo help
+	@$(ECHOWHITE)
+	@echo -e "\tPrint help (this message) and exit"
+
+	@$(ECHOBLUE)
 	@echo all
 	@$(ECHOWHITE)
 	@echo -e "\tCompile all the test files with our lib and the pthread lib"
