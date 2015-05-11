@@ -36,7 +36,7 @@ void init_thread(thread_t *t){
 }
 
 void init_thread_main(){
-  printf("thread_init_main called !!!!!\n ");
+  //  printf("thread_init_main called !!!!!\n ");
   main_thread = malloc(sizeof(thread_s));
   getcontext(&(main_thread->context));
   main_thread->retval = NULL;
@@ -116,7 +116,7 @@ int thread_yield(void){
 
 int thread_join(thread_t thread, void **retval)
 {
-  printf("thread_init %i\n", thread_init);
+  //  printf("thread_init %i\n", thread_init);
   assert(thread_init);
 
   // Est-ce qu'il est attendu par quelqu'un d'autre ? (si oui on quitte)
@@ -151,7 +151,7 @@ int thread_join(thread_t thread, void **retval)
   }
 
   // Normalement on ne reviens ici que si le thread est fini
-  printf("thread->status: %d\n", (int)thread->status);
+  //  printf("thread->status: %d\n", (int)thread->status);
   assert( thread->status == FINISHED );
 
   // Recupere la valeur de retour
@@ -173,7 +173,7 @@ int thread_join(thread_t thread, void **retval)
 
 void thread_exit(void *retval) {
   assert(thread_init);
-  printf("exit\n");
+  //  printf("exit\n");
 
   current_thread->retval = retval;
   current_thread->status = FINISHED;
@@ -182,13 +182,13 @@ void thread_exit(void *retval) {
 
   // Il y a un thread qui m'attend, je lui donne la main
   if(current_thread->waiting_by){
-    fprintf(stderr, "Je donne la main\n");
+    // fprintf(stderr, "Je donne la main\n");
     current_thread = current_thread->waiting_by;
     current_thread->status = READY;
   }
   // Sinon je donne la main au premier qui est ready
   else if (STAILQ_FIRST(&thread_queue)){
-    fprintf(stderr, "Je donne la main\n");
+    //    fprintf(stderr, "Je donne la main\n");
     current_thread = STAILQ_FIRST(&thread_queue);
     STAILQ_REMOVE_HEAD(&thread_queue, next);
   }
@@ -197,7 +197,7 @@ void thread_exit(void *retval) {
     exit(0);
   }
 
-  printf("current thread= %d\n", current_thread->status);
+  //  printf("current thread= %d\n", current_thread->status);
   assert(current_thread->status == READY);
 
   int rc = setcontext( &(current_thread->context));
@@ -208,7 +208,7 @@ void thread_exit(void *retval) {
 void clean_finished_thread(void) __attribute__((destructor));
 void clean_finished_thread(){
   if(current_thread != main_thread && current_thread != NULL){
-    printf("on free le thread\n");
+    //    printf("on free le thread\n");
     VALGRIND_STACK_DEREGISTER(current_thread->valgrind_stack_id);
     //free((current_thread->context).uc_stack.ss_sp);
   }
