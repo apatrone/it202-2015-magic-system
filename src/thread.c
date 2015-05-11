@@ -8,6 +8,7 @@
 #include <assert.h>
 #include "valgrind.h"
 
+#define PRIORITY 0
 STAILQ_HEAD(threadqueue, thread_) ;
 
 int thread_init = 0;
@@ -99,7 +100,10 @@ int thread_create(thread_t *newthread, void *(*func)(void *), void *funcarg){
   (t->status) = READY;
 
   *newthread = t;
-  insertion(t);
+  if(PRIORITY==1)
+    insertion(t);
+  else 
+    STAILQ_INSERT_TAIL(&thread_queue, t, next);
 
   return 0;
 }
@@ -123,7 +127,10 @@ int thread_yield(void){
 
   //current_thread->status = RUNNING;
   if (old_thread != current_thread ) {
-    insertion(old_thread);
+    if(PRIORITY==1)
+      insertion(old_thread);
+    else
+      STAILQ_INSERT_TAIL(&thread_queue, t, next);
     int ret= swapcontext(&(old_thread->context), &(current_thread->context));
     if(ret==-1)
       return -1;
