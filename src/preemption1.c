@@ -39,8 +39,15 @@ void disable_preempt(){
 
 
 void preemption_init(){
+// init les signaux
+//init le timer
 
+}
+
+void premption_quit{
   
+
+
 }
 
 

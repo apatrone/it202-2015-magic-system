@@ -54,6 +54,9 @@ void libthread_init() {	  //pas besoin d'allouer la pile pour le main thread car
   getcontext(&(main_thread->context));
   current_thread = main_thread;
   thread_init = 1;
+
+
+  //activation de la preemption
 }
 
 
@@ -104,7 +107,7 @@ int thread_create(thread_t *newthread, void *(*func)(void *), void *funcarg){
   *newthread = t;
   if(PRIORITY==1)
     insertion(t);
-  else 
+  else
     STAILQ_INSERT_TAIL(&thread_queue, t, next);
 
   return 0;
@@ -114,7 +117,7 @@ int thread_create(thread_t *newthread, void *(*func)(void *), void *funcarg){
 
 
 int thread_yield(void){
-  
+
   if(!thread_init){
     libthread_init();
   }
@@ -128,7 +131,7 @@ int thread_yield(void){
     }
 
   //current_thread->status = RUNNING;
-  if (old_thread != current_thread ) {   
+  if (old_thread != current_thread ) {
     if(PRIORITY==1)
       insertion(old_thread);
     else
