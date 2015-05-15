@@ -1,6 +1,7 @@
 #include <stdio.h>
 #include <assert.h>
 #include "thread.h"
+#include <sys/time.h>
 
 /* test de switchs.
  *
@@ -30,6 +31,10 @@ static void * thfunc(void *id)
 
 int main()
 {
+
+  struct timeval start, end;
+  gettimeofday(&start, NULL);
+
   thread_t th1,th2,th3;
   void *res;
   int err, i;
@@ -58,5 +63,9 @@ int main()
   assert(res == NULL);
 
   printf("main terminé\n");
+  gettimeofday(&end, NULL);
+  printf("time: %ld µs\n", ((end.tv_sec * 1000000 + end.tv_usec)
+			    - (start.tv_sec * 1000000 + start.tv_usec)));
+
   return 0;
 }
