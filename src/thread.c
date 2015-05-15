@@ -8,11 +8,18 @@
 #include <assert.h>
 #include "valgrind.h"
 #include <sys/time.h>
+
+#include "preemption.c"
+
 #define PRIORITY 0
 
-STAILQ_HEAD(threadqueue, thread_) ;
-struct itimerval *timeslice = {{1,1000000},{1,1000000}}
-struct itimerval *timer = setitimer(0, timeslice, NULL);
+STAILQ_HEAD(threadqueue, thread_);
+
+/*
+struct itimerval timeslice = {{1,1000000},{1,1000000}};
+struct itimerval timer = setitimer(0, timeslice, NULL);
+*/
+
 int thread_init = 0;
 
 struct threadqueue thread_queue;
@@ -36,6 +43,9 @@ void init_thread(thread_t *t){
   thd->retval=NULL;
   thd->priority=0;
   *t = thd;
+
+  preemption_init();
+
 }
 
 void init_thread_main(){
@@ -136,7 +146,7 @@ int thread_yield(void){
       insertion(old_thread);
     else
       STAILQ_INSERT_TAIL(&thread_queue, old_thread, next);
-    setitimer(0,timeslice,timer);
+    //setitimer(0,timeslice, timer);
     int ret= swapcontext(&(old_thread->context), &(current_thread->context));
     if(ret==-1)
       return -1;
@@ -178,7 +188,7 @@ int thread_join(thread_t thread, void **retval)
       }//pas de else?
     }
     assert( old_thread != current_thread );
-    setitimer(0,timeslice ,timer );
+    //setitimer(0,timeslice ,timer );
     swapcontext(&(old_thread->context), &(current_thread->context));
   }
 
