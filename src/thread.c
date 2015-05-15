@@ -44,8 +44,8 @@ void init_thread(thread_t *t){
   thd->priority=0;
   *t = thd;
 
-  //preemption_init();
-  //enable_preempt();
+  preemption_init();
+  enable_preempt();
 }
 
 void init_thread_main(){
@@ -71,8 +71,8 @@ void libthread_init() {	  //pas besoin d'allouer la pile pour le main thread car
 
   //activation de la preemption
 
-  //preemption_init();
-  //enable_preempt();
+  preemption_init();
+  enable_preempt();
 }
 
 
@@ -110,7 +110,7 @@ void insertion( thread_t t){
 
 int thread_create(thread_t *newthread, void *(*func)(void *), void *funcarg){
 
-  //disable_peempt();
+  disable_preempt();
   if(!thread_init){
     libthread_init();
   }
@@ -127,13 +127,13 @@ int thread_create(thread_t *newthread, void *(*func)(void *), void *funcarg){
   else
     STAILQ_INSERT_TAIL(&thread_queue, t, next);
 
-    //enable_preempt();
+  enable_preempt();
   return 0;
 }
 
 
 int thread_yield(void){
-  //disable_preempt();
+  disable_preempt();
   if(!thread_init){
     libthread_init();
   }
@@ -158,7 +158,7 @@ int thread_yield(void){
       return -1;
 
   }
-  //enable_preempt();
+  enable_preempt();
   return 0;
 
 }
@@ -166,13 +166,14 @@ int thread_yield(void){
 int thread_join(thread_t thread, void **retval)
 {
   //  printf("thread_init %i\n", thread_init);
+  disable_preempt();
   assert(thread_init);
 
   // Est-ce qu'il est attendu par quelqu'un d'autre ? (si oui on quitte)
   if(thread->waiting_by != NULL){
     return -1;
   }
-  //disable_preempt();
+  
   // Si non, c'est nous qui l'attendons et personne d'autre
   else {
     current_thread->status = WAITING;
@@ -215,14 +216,14 @@ int thread_join(thread_t thread, void **retval)
     free((thread->context).uc_stack.ss_sp);
   }
   free(thread);
-  //enable_preempt();
+  enable_preempt();
   return 0;
 }
 
 
 
 void thread_exit(void *retval) {
-  //disable_preempt();
+  disable_preempt();
 
   assert(thread_init);
   //  printf("exit\n");
@@ -265,5 +266,5 @@ void clean_finished_thread(){
     //free((current_thread->context).uc_stack.ss_sp);
   }
   free(current_thread);
-  //enable_preempt();
+  enable_preempt();
 }

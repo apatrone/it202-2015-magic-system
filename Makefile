@@ -1,5 +1,5 @@
 CC = gcc
-CFLAGS = -Wall -Wextra -I. -g3
+CFLAGS = -Wall -Wextra -I. -g3 -lrt
 VALGRINDFLAGS = --db-attach=yes -v --leak-check=yes --track-origins=yes --show-reachable=yes
 LIB_THREAD = -DUSE_PTHREAD -lpthread
 
