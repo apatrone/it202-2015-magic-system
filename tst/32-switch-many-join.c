@@ -62,11 +62,12 @@ int main(int argc, char *argv[])
   thfunc((void*) nbth);
 
   printf("%ld threads créés et détruits\n", nbth);
-  return 0;
+ 
 
 
   gettimeofday(&end, NULL);
-
   printf("time: %ld µs\n", ((end.tv_sec * 1000000 + end.tv_usec)
   - (start.tv_sec * 1000000 + start.tv_usec)));
+
+  return 0;
 }

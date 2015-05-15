@@ -16,6 +16,7 @@
  */
 
 thread_t thmain = NULL;
+struct timeval start, end;
 
 static void * thfunc(void *dummy __attribute__((unused)))
 {
@@ -26,6 +27,9 @@ static void * thfunc(void *dummy __attribute__((unused)))
   assert(!err);
   assert(res == (void*) 0xdeadbeef);
   printf("main terminé OK\n");
+  gettimeofday(&end, NULL);
+  printf("time: %ld µs\n", ((end.tv_sec * 1000000 + end.tv_usec)
+  - (start.tv_sec * 1000000 + start.tv_usec)));
   return NULL;
 }
 
@@ -34,7 +38,7 @@ int main()
   thread_t th;
   int err;
 
-  struct timeval start, end;
+
   gettimeofday(&start, NULL);
 
   thmain = thread_self();
@@ -45,9 +49,8 @@ int main()
   thread_exit((void*) 0xdeadbeef);
 
 
-  gettimeofday(&end, NULL);
 
-  printf("time: %ld µs\n", ((end.tv_sec * 1000000 + end.tv_usec)
-  - (start.tv_sec * 1000000 + start.tv_usec)));
+
+
   return 0;
 }

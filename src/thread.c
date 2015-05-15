@@ -93,18 +93,22 @@ thread_t thread_self(){
 
 
 void insertion( thread_t t){
+  //      printf("ici ok\n");
   int i=t->priority;
-  thread_t tmp=STAILQ_FIRST(&thread_queue);
-  if(!tmp)
-    STAILQ_INSERT_HEAD(&thread_queue, t, next);
-  else  if(i>tmp->priority){
+  thread_t tmp;
+  tmp=STAILQ_FIRST(&thread_queue);
+  if(!(tmp)){
+    STAILQ_INSERT_HEAD(&thread_queue, t, next);}
+  else  if(i>((tmp)->priority)){
     STAILQ_INSERT_HEAD(&thread_queue, t, next);
   }
   else{
-    while((i<=tmp->priority)&&(STAILQ_NEXT(tmp, next)!=NULL)){
+    while((i<=(tmp)->priority)&&(STAILQ_NEXT(tmp, next)!=NULL)){
       tmp= STAILQ_NEXT(tmp, next);
     }
     STAILQ_INSERT_AFTER(&thread_queue, tmp, t, next);
+    // free((tmp->context).uc_stack.ss_sp);
+    //free(tmp);
   }
 }
 
@@ -122,10 +126,7 @@ int thread_create(thread_t *newthread, void *(*func)(void *), void *funcarg){
   (t->status) = READY;
 
   *newthread = t;
-  if(PRIORITY==1)
-    insertion(t);
-  else
-    STAILQ_INSERT_TAIL(&thread_queue, t, next);
+  insertion(t);// STAILQ_INSERT_TAIL(&thread_queue, t, next);
 
   enable_preempt();
   return 0;
@@ -148,10 +149,7 @@ int thread_yield(void){
 
   //current_thread->status = RUNNING;
   if (old_thread != current_thread ) {
-    if(PRIORITY==1)
-      insertion(old_thread);
-    else
-      STAILQ_INSERT_TAIL(&thread_queue, old_thread, next);
+    insertion(old_thread); /* STAILQ_INSERT_TAIL(&thread_queue, old_thread, next);*/
     //setitimer(0,timeslice, timer);
     int ret= swapcontext(&(old_thread->context), &(current_thread->context));
     if(ret==-1)
