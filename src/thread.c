@@ -9,7 +9,7 @@
 #include "valgrind.h"
 #include <sys/time.h>
 
-#include "preemption.c"
+#include "preemption1.c"
 
 #define PRIORITY 0
 
@@ -44,8 +44,8 @@ void init_thread(thread_t *t){
   thd->priority=0;
   *t = thd;
 
-  preemption_init();
-
+  //preemption_init();
+  //enable_preempt();
 }
 
 void init_thread_main(){
