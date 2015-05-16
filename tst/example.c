@@ -15,7 +15,7 @@ static void * threadfunc(void * arg)
   thread_exit(arg);
 }
 
-int main(int argc, char *argv[])
+int main()
 {
   thread_t thread1, thread2;
   void *retval1, *retval2;

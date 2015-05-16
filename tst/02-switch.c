@@ -54,7 +54,7 @@ int main()
 
   err = thread_join(th3, &res);
   assert(!err);
-  printf("res: %d \n", (int)res);
+  printf("res: %p \n", res);
   assert(res == NULL);
   err = thread_join(th2, NULL); /* on ignore ce code de retour */
   assert(!err);

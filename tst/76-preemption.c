@@ -3,12 +3,12 @@
 #include <sys/time.h>
 #include "thread.h"
 
-long long index = 0;
+long long index1 = 0;
 
-void * loop(void * unused)
+void * loop()
 {
   while(1)
-    ++index;
+    ++index1;
 }
 
 int main()
@@ -21,7 +21,7 @@ int main()
     {
       struct timeval start, end;
       gettimeofday(&start, NULL);
-      printf("Pas: %lld\n", index);
+      printf("Pas: %lld\n", index1);
       thread_yield();
 
       gettimeofday(&end, NULL);
