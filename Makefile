@@ -64,6 +64,7 @@ test-all:
 	@$(ECHOGREEN)
 	@echo -e "\nTesting ..."
 	@$(ECHOWHITE)
+	@echo  "(if nothing is printed, the test binary exectuted with success)"
 
 	@$(eval binname := "01-main")
 	@$(eval args := "")
@@ -104,6 +105,8 @@ test-all:
 	@$(eval binname := "51-fibonacci")
 	@$(eval args := "4")
 	@$(shortbinarytest)
+
+	@$(ECHOGREEN)
 	@echo "Done !"
 
 
