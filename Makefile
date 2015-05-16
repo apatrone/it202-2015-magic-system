@@ -43,6 +43,7 @@ with-ourlib:
 	@$(ECHOWHITE)
 	@mkdir -p bin/ourlib
 	@$(foreach tstfile,$(TSTLIST),$(inforeachwithourlib))
+	@$(ECHOGREEN)
 	@echo "Done !"
 
 
@@ -57,14 +58,17 @@ with-pthread:
 	@$(ECHOWHITE)
 	@mkdir -p bin/pthread
 	@$(foreach tstfile,$(TSTLIST),$(inforeachwithpthread))
+	@$(ECHOGREEN)
 	@echo "Done !"
 
 
 test-all:
+	
+	@make -s with-ourlib
 	@$(ECHOGREEN)
 	@echo -e "\nTesting ..."
 	@$(ECHOWHITE)
-	@echo  "(if nothing is printed, the test binary exectuted with success)"
+	@echo  -e "(if nothing is printed, the test binary exectuted with success)"
 
 	@$(eval binname := "01-main")
 	@$(eval args := "")
